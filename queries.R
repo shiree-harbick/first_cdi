@@ -2,6 +2,7 @@
 # install.packages("sqldf")
 # install.packages("stringr")
 # install.packages("gsheet")
+# install.packages("reticulate")
 # install.packages("devtools")
 
 # For fun...
@@ -80,7 +81,7 @@ compute_words <- function(says = FALSE, total_words) {
 }
 
 compute_improvement <- function(words) {
-  improvement <- sqldf("SELECT SubjectId, `Group`, (WordsTimepoint3Pct-WordsTimepoint1Pct)/WordsTimepoint1Pct AS PctImprovement FROM words")
+  improvement <- sqldf("SELECT SubjectId, `Group`, WordsTimepoint3Pct-WordsTimepoint1Pct AS PctImprovement FROM words")
   return(improvement)
 }
 
@@ -89,4 +90,4 @@ print(compute_improvement(compute_words(says = FALSE, total_words = num_words)))
 print(compute_improvement(compute_words(says = TRUE, total_words = num_words)))
 
 # Just emit summary word count/percentage data
-# print(compute_words(says = TRUE, total_words = num_words))
+print(compute_words(says = TRUE, total_words = num_words))
