@@ -2,6 +2,12 @@
 # install.packages("sqldf")
 # install.packages("stringr")
 # install.packages("gsheet")
+# install.packages("devtools")
+
+# For fun...
+# devtools::install_github("ciannabp/inauguration")
+# library(inauguration)
+# inauguration("inauguration_2021")
 
 ###########################################################################
 #  For using Python's code: https://rstudio.github.io/reticulate/index.html
