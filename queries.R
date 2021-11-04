@@ -27,16 +27,16 @@ library(gsheet)
 library(reticulate)
 
 # Load the FIRST data from our Google Sheet
-first_assessments <- gsheet2tbl("https://docs.google.com/spreadsheets/d/1roCRVLC7EkDbKj8InxMiEqyQo5N15_JxBqpcKCOAB3E")
+first_assessments <- gsheet2tbl("https://docs.google.com/spreadsheets/d/1roCRVLC7EkDbKj8InxMiEqyQo5N15_JxBqpcKCOAB3E#gid=0")
 first_subjects <- gsheet2tbl("https://docs.google.com/spreadsheets/d/1roCRVLC7EkDbKj8InxMiEqyQo5N15_JxBqpcKCOAB3E#gid=1543210053")
 first_questions <- gsheet2tbl("https://docs.google.com/spreadsheets/d/1roCRVLC7EkDbKj8InxMiEqyQo5N15_JxBqpcKCOAB3E#gid=495058202")
 num_words <- sqldf("SELECT COUNT(*) AS cnt FROM first_questions WHERE QuestionId LIKE '1.d%'")$cnt
 
 # Define a function that can run a variety of queries based on a QuestionId prefix and Answer query part
-print_cdi_summary <- function(type,question_query,answer_query="") {
+print_cdi_summary <- function(type,question_query,answer_query="",exclude_subjects_query="") {
   print(type)
   print("-----------------------")
-  for (group_query in c('8 session', '1 session', 'NO session')) {
+  for (group_query in c('8 session', '4 session', '4 session on-Tu', '4 session on-Th', '4 session off', '1 session', 'NO session')) {
     print(group_query)
     for (timepoint in c(1,2,3)) {
       query <- str_interp("
@@ -45,8 +45,9 @@ print_cdi_summary <- function(type,question_query,answer_query="") {
             FROM first_assessments
             WHERE QuestionId LIKE '${question_query}' AND
                   EvalNum <= ${timepoint} AND
-                  `Group` = '${group_query}'
+                  `Group` LIKE '${group_query}%'
                   ${if (nchar(answer_query) > 0) paste('AND ', answer_query) else ''}
+                  ${if (nchar(exclude_subjects_query) > 0) paste('AND ', exclude_subjects_query) else ''}
             GROUP by SubjectId
             ORDER BY EvalNum
         )")
@@ -57,6 +58,7 @@ print_cdi_summary <- function(type,question_query,answer_query="") {
 
 # Report on a few bits of data
 print_cdi_summary('Words Produced', '1.d%', "Answer = 'says'")
+print_cdi_summary('Words Produced', '1.d%', "Answer = 'says'", "SubjectId != 'DIOCA'") # EXCLUDE DIOCA
 print_cdi_summary('Words Understood', '1.d%')
 print_cdi_summary('Phrases Understood', '1.b%')
 print_cdi_summary('Total Gestures', '2.%', "Answer IN ('yes','sometimes', 'often')")
@@ -91,3 +93,20 @@ print(compute_improvement(compute_words(says = TRUE, total_words = num_words)))
 
 # Just emit summary word count/percentage data
 print(compute_words(says = TRUE, total_words = num_words))
+
+
+#####################################################################
+# Other queries that might be useful or interesting
+# Find an outlier in total number of words produced... Just ignore EvalDate and count total
+sqldf(str_interp("SELECT SubjectId, COUNT(*) FROM first_assessments WHERE Answer='says' GROUP BY SubjectId"))
+
+# Count how many words DIOCA says at each EvalDate.
+sqldf(str_interp("SELECT EvalDate, COUNT(*) FROM first_assessments WHERE Answer='says' AND SubjectId='DIOCA' GROUP BY EvalDate"))
+
+# How many subjects per group?
+sqldf(str_interp("SELECT `Group`, COUNT(*) FROM first_subjects GROUP BY `Group`"))
+
+# Average age in months at EvalNum=3 by group?
+sqldf(str_interp("SELECT `Group`, AVG(SubjectAgeMonths) FROM first_assessments WHERE EvalNum = 3 GROUP BY `Group`"))
+# WITHOUT DIOCA
+sqldf(str_interp("SELECT `Group`, AVG(SubjectAgeMonths) FROM first_assessments WHERE EvalNum = 3 AND SubjectId != 'DIOCA' GROUP BY `Group`"))
