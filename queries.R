@@ -70,9 +70,7 @@ compute_words <- function(says = FALSE, total_words) {
   query <- str_interp("
     SELECT SubjectId, `Group`,
                       SUM(EvalNum=1) AS WordsTimepoint1,
-                      SUM(EvalNum=1)/${total_words}.0 AS WordsTimepoint1Pct,
-                      COUNT(DISTINCT QuestionId) AS WordsTimepoint3,
-                      COUNT(DISTINCT QuestionId)/${total_words}.0 AS WordsTimepoint3Pct
+                      COUNT(DISTINCT QuestionId) AS WordsTimepoint3
                       FROM first_assessments
                       WHERE QuestionId LIKE '1.d%'
                       ${if (says) 'AND Answer = \"says\"' else ''}
@@ -110,3 +108,16 @@ sqldf(str_interp("SELECT `Group`, COUNT(*) FROM first_subjects GROUP BY `Group`"
 sqldf(str_interp("SELECT `Group`, AVG(SubjectAgeMonths) FROM first_assessments WHERE EvalNum = 3 GROUP BY `Group`"))
 # WITHOUT DIOCA
 sqldf(str_interp("SELECT `Group`, AVG(SubjectAgeMonths) FROM first_assessments WHERE EvalNum = 3 AND SubjectId != 'DIOCA' GROUP BY `Group`"))
+
+# This should be basically the same result as compute_words but it includes the intermediate Eval2 which makes the query harder.
+sqldf(str_interp("
+SELECT SubjectId, `Group`, SUM(WordsTimepoint1) AS WordsTimepoint1, SUM(WordsTimepoint2) AS WordsTimepoint2, SUM(WordsTimepoint3) AS WordsTimepoint3 FROM (
+  SELECT SubjectId, `Group`, COUNT(DISTINCT QuestionId) AS WordsTimepoint1, 0 AS WordsTimepoint2, 0 AS WordsTimepoint3 FROM first_assessments
+  WHERE QuestionId LIKE '1.d%' AND EvalNum = 1 AND Answer = \"says\" GROUP BY SubjectId
+      UNION ALL
+  SELECT SubjectId, `Group`, 0 AS WordsTimepoint1, COUNT(DISTINCT QuestionId) AS WordsTimepoint2, 0 AS WordsTimepoint3 FROM first_assessments
+  WHERE QuestionId LIKE '1.d%' AND EvalNum IN (1,2) AND Answer = \"says\" GROUP BY SubjectId
+      UNION ALL
+  SELECT SubjectId, `Group`, 0 AS WordsTimepoint1, 0 AS WordsTimepoint3, COUNT(DISTINCT QuestionId) AS WordsTimepoint3 FROM first_assessments
+  WHERE QuestionId LIKE '1.d%' AND EvalNum IN (1,2,3) AND Answer = \"says\" GROUP BY SubjectId
+) GROUP BY SubjectId ORDER BY SubjectId"))
