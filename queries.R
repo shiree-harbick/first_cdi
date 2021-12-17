@@ -118,6 +118,6 @@ SELECT SubjectId, `Group`, SUM(WordsTimepoint1) AS WordsTimepoint1, SUM(WordsTim
   SELECT SubjectId, `Group`, 0 AS WordsTimepoint1, COUNT(DISTINCT QuestionId) AS WordsTimepoint2, 0 AS WordsTimepoint3 FROM first_assessments
   WHERE QuestionId LIKE '1.d%' AND EvalNum IN (1,2) AND Answer = \"says\" GROUP BY SubjectId
       UNION ALL
-  SELECT SubjectId, `Group`, 0 AS WordsTimepoint1, 0 AS WordsTimepoint3, COUNT(DISTINCT QuestionId) AS WordsTimepoint3 FROM first_assessments
+  SELECT SubjectId, `Group`, 0 AS WordsTimepoint1, 0 AS WordsTimepoint2, COUNT(DISTINCT QuestionId) AS WordsTimepoint3 FROM first_assessments
   WHERE QuestionId LIKE '1.d%' AND EvalNum IN (1,2,3) AND Answer = \"says\" GROUP BY SubjectId
 ) GROUP BY SubjectId ORDER BY SubjectId"))
