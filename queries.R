@@ -121,3 +121,39 @@ SELECT SubjectId, `Group`, SUM(WordsTimepoint1) AS WordsTimepoint1, SUM(WordsTim
   SELECT SubjectId, `Group`, 0 AS WordsTimepoint1, 0 AS WordsTimepoint2, COUNT(DISTINCT QuestionId) AS WordsTimepoint3 FROM first_assessments
   WHERE QuestionId LIKE '1.d%' AND EvalNum IN (1,2,3) AND Answer = \"says\" GROUP BY SubjectId
 ) GROUP BY SubjectId ORDER BY SubjectId"))
+
+sqldf(str_interp("
+SELECT SubjectId, `Group`, SUM(WordsTimepoint1) AS WordsTimepoint1, SUM(WordsTimepoint2) AS WordsTimepoint2, SUM(WordsTimepoint3) AS WordsTimepoint3 FROM (
+  SELECT SubjectId, `Group`, COUNT(DISTINCT QuestionId) AS WordsTimepoint1, 0 AS WordsTimepoint2, 0 AS WordsTimepoint3 FROM first_assessments
+  WHERE QuestionId LIKE '1.d%' AND EvalNum = 1 AND Answer = \"understands\" GROUP BY SubjectId
+      UNION ALL
+  SELECT SubjectId, `Group`, 0 AS WordsTimepoint1, COUNT(DISTINCT QuestionId) AS WordsTimepoint2, 0 AS WordsTimepoint3 FROM first_assessments
+  WHERE QuestionId LIKE '1.d%' AND EvalNum IN (1,2) AND Answer = \"understands\" GROUP BY SubjectId
+      UNION ALL
+  SELECT SubjectId, `Group`, 0 AS WordsTimepoint1, 0 AS WordsTimepoint2, COUNT(DISTINCT QuestionId) AS WordsTimepoint3 FROM first_assessments
+  WHERE QuestionId LIKE '1.d%' AND EvalNum IN (1,2,3) AND Answer = \"understands\" GROUP BY SubjectId
+) GROUP BY SubjectId ORDER BY SubjectId"))
+
+sqldf(str_interp("
+SELECT SubjectId, `Group`, SUM(WordsTimepoint1) AS WordsTimepoint1, SUM(WordsTimepoint2) AS WordsTimepoint2, SUM(WordsTimepoint3) AS WordsTimepoint3 FROM (
+  SELECT SubjectId, `Group`, COUNT(DISTINCT QuestionId) AS WordsTimepoint1, 0 AS WordsTimepoint2, 0 AS WordsTimepoint3 FROM first_assessments
+  WHERE QuestionId LIKE '1.b%' AND EvalNum = 1 AND Answer = \"understands\" GROUP BY SubjectId
+      UNION ALL
+  SELECT SubjectId, `Group`, 0 AS WordsTimepoint1, COUNT(DISTINCT QuestionId) AS WordsTimepoint2, 0 AS WordsTimepoint3 FROM first_assessments
+  WHERE QuestionId LIKE '1.b%' AND EvalNum IN (1,2) AND Answer = \"understands\" GROUP BY SubjectId
+      UNION ALL
+  SELECT SubjectId, `Group`, 0 AS WordsTimepoint1, 0 AS WordsTimepoint2, COUNT(DISTINCT QuestionId) AS WordsTimepoint3 FROM first_assessments
+  WHERE QuestionId LIKE '1.b%' AND EvalNum IN (1,2,3) AND Answer = \"understands\" GROUP BY SubjectId
+) GROUP BY SubjectId ORDER BY SubjectId"))
+
+sqldf(str_interp("
+SELECT SubjectId, `Group`, SUM(WordsTimepoint1) AS WordsTimepoint1, SUM(WordsTimepoint2) AS WordsTimepoint2, SUM(WordsTimepoint3) AS WordsTimepoint3 FROM (
+  SELECT SubjectId, `Group`, COUNT(DISTINCT QuestionId) AS WordsTimepoint1, 0 AS WordsTimepoint2, 0 AS WordsTimepoint3 FROM first_assessments
+  WHERE QuestionId LIKE '2.%' AND EvalNum = 1 AND Answer IN (\"sometimes\", \"often\", \"yes\") GROUP BY SubjectId
+      UNION ALL
+  SELECT SubjectId, `Group`, 0 AS WordsTimepoint1, COUNT(DISTINCT QuestionId) AS WordsTimepoint2, 0 AS WordsTimepoint3 FROM first_assessments
+  WHERE QuestionId LIKE '2.%' AND EvalNum IN (1,2) AND Answer IN (\"sometimes\", \"often\", \"yes\") GROUP BY SubjectId
+      UNION ALL
+  SELECT SubjectId, `Group`, 0 AS WordsTimepoint1, 0 AS WordsTimepoint2, COUNT(DISTINCT QuestionId) AS WordsTimepoint3 FROM first_assessments
+  WHERE QuestionId LIKE '2.%' AND EvalNum IN (1,2,3) AND Answer IN (\"sometimes\", \"often\", \"yes\") GROUP BY SubjectId
+) GROUP BY SubjectId ORDER BY SubjectId"))
