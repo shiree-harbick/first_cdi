@@ -1,0 +1,106 @@
+###########################################################################
+# Plots + Tukey-on-gains for the mixed-ANOVA re-analysis
+#
+# Run from the repository root, AFTER mixed_anova_analysis.R:
+#   Rscript ANOVA/mixed_anova_plots.R
+###########################################################################
+
+results_dir <- "ANOVA/results"
+figures_dir <- "ANOVA/figures"
+
+d <- read.csv(
+  "ANOVA Student Clinician Results Sept 2024/student-clinician-all-cleaned.csv",
+  check.names = FALSE
+)
+names(d)[names(d) == "Session Group"] <- "Group"
+d$Group <- factor(d$Group, levels = c("0", "1", "4", "8"))
+session_n <- c("0" = 0, "1" = 1, "4" = 4, "8" = 8)
+glab <- levels(d$Group)
+cols <- c("#4477AA", "#66CCEE", "#CCBB44", "#EE6677")  # 0/1/4/8
+
+cell_stats <- function(pre, post) {
+  n   <- as.numeric(table(d$Group))
+  agg <- function(col, fun) as.numeric(tapply(d[[col]], d$Group, fun))
+  data.frame(
+    Group = glab,
+    sessions = as.numeric(session_n[glab]),
+    pre_m  = agg(pre,  mean),  pre_se  = agg(pre,  sd) / sqrt(n),
+    post_m = agg(post, mean),  post_se = agg(post, sd) / sqrt(n),
+    gain_m = as.numeric(tapply(d[[post]] - d[[pre]], d$Group, mean)),
+    gain_se = as.numeric(tapply(d[[post]] - d[[pre]], d$Group, sd)) / sqrt(n)
+  )
+}
+
+ebar <- function(x, m, se, col) arrows(x, m - se, x, m + se, angle = 90,
+                                       code = 3, length = 0.04, col = col, lwd = 1.5)
+
+## ---- Plot 1: Total interaction (pre -> post by group) ----
+s <- cell_stats("TotalA", "TotalB")
+png(file.path(figures_dir, "fig_total_interaction.png"), width = 1500, height = 1100, res = 200)
+par(mar = c(4.5, 4.5, 3, 1))
+plot(NA, xlim = c(0.8, 2.2), ylim = c(18, 34), xaxt = "n",
+     xlab = "", ylab = "Total reading-comprehension score (7-35)",
+     main = "Pre -> Post by session group (Group x Time interaction)")
+axis(1, at = c(1, 2), labels = c("Pre", "Post"))
+for (i in seq_along(glab)) {
+  lines(c(1, 2), c(s$pre_m[i], s$post_m[i]), col = cols[i], lwd = 2.5, type = "b", pch = 19)
+  ebar(1, s$pre_m[i],  s$pre_se[i],  cols[i])
+  ebar(2, s$post_m[i], s$post_se[i], cols[i])
+}
+legend("topleft", legend = paste(glab, "sessions"), col = cols, lwd = 2.5, pch = 19, bty = "n")
+dev.off()
+
+## ---- Plot 2: Dose-response of total gain ----
+g <- read.csv(file.path(results_dir, "followup_dose_trend.csv"))
+slope <- g$slope_per_session[g$Outcome == "Total"]
+icpt  <- coef(lm((d$TotalB - d$TotalA) ~ session_n[as.character(d$Group)]))[1]
+png(file.path(figures_dir, "fig_total_dose_response.png"), width = 1500, height = 1100, res = 200)
+par(mar = c(4.5, 4.5, 3, 1))
+plot(s$sessions, s$gain_m, pch = 19, cex = 1.6, col = cols, ylim = c(0, 12),
+     xlab = "Number of sessions", ylab = "Mean total gain (post - pre)",
+     main = sprintf("Dose-response: +%.2f points per session (p = %.4f)", slope, g$p[g$Outcome=="Total"]))
+ebar(s$sessions, s$gain_m, s$gain_se, cols)
+abline(a = icpt, b = slope, lty = 2, col = "grey30", lwd = 2)
+text(s$sessions, s$gain_m, labels = paste0("n=", table(d$Group)), pos = 3, cex = 0.8)
+dev.off()
+
+## ---- Plot 3: per-item interaction panel (Total + Survey Items 1-7) ----
+items <- c("Total", paste0("RC", 1:7))
+labs  <- c("Total", paste("Survey Item", 1:7))   # display labels for RC1-RC7
+prec  <- c("TotalA", paste0("RC", 1:7, "A"))
+postc <- c("TotalB", paste0("RC", 1:7, "B"))
+png(file.path(figures_dir, "fig_item_interaction_panel.png"), width = 2000, height = 1100, res = 175)
+par(mfrow = c(2, 4), mar = c(3.2, 3.6, 2.4, 0.6), mgp = c(2.1, 0.7, 0))
+for (k in seq_along(items)) {
+  s <- cell_stats(prec[k], postc[k])
+  yl <- if (items[k] == "Total") c(18, 34) else c(2.3, 5)
+  yax <- if (items[k] == "Total") "Total score" else "Score (1-5)"
+  plot(NA, xlim = c(0.8, 2.2), ylim = yl, xaxt = "n", xlab = "", ylab = yax, main = labs[k])
+  axis(1, at = c(1, 2), labels = c("Pre", "Post"))
+  for (i in seq_along(glab)) {
+    lines(c(1, 2), c(s$pre_m[i], s$post_m[i]), col = cols[i], lwd = 2, type = "b", pch = 19, cex = 0.8)
+  }
+  if (k == 1) legend("topleft", legend = glab, col = cols, lwd = 2, pch = 19, bty = "n", cex = 0.8, title = "sessions")
+}
+dev.off()
+
+## ---- Tukey HSD on GAIN scores (baseline-corrected pairwise) ----
+tuk_rows <- list()
+for (k in seq_along(items)) {
+  gain <- d[[postc[k]]] - d[[prec[k]]]
+  th <- TukeyHSD(aov(gain ~ d$Group))$`d$Group`
+  for (r in rownames(th)) {
+    tuk_rows[[length(tuk_rows) + 1]] <- data.frame(
+      Outcome = labs[k], Comparison = r,
+      Diff_in_gain = round(th[r, "diff"], 3),
+      lwr = round(th[r, "lwr"], 3), upr = round(th[r, "upr"], 3),
+      p_adj = signif(th[r, "p adj"], 4),
+      Sig = ifelse(th[r, "p adj"] < 0.05, "*", "")
+    )
+  }
+}
+tukey <- do.call(rbind, tuk_rows)
+write.csv(tukey, file.path(results_dir, "followup_tukey_on_gains.csv"), row.names = FALSE)
+cat("Tukey HSD on GAIN scores (significant pairs only):\n")
+print(tukey[tukey$Sig == "*", ], row.names = FALSE)
+cat("\nSaved figures to", figures_dir, "and tables to", results_dir, "\n")
