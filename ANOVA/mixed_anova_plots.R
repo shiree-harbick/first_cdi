@@ -37,7 +37,8 @@ ebar <- function(x, m, se, col) arrows(x, m - se, x, m + se, angle = 90,
 s <- cell_stats("TotalA", "TotalB")
 png(file.path("figures/fig_total_interaction.png"), width = 1500, height = 1100, res = 200)
 par(mar = c(4.5, 4.5, 3, 1))
-plot(NA, xlim = c(0.8, 2.2), ylim = c(18, 34), xaxt = "n",
+#plot(NA, xlim = c(0.8, 2.2), ylim = c(18, 34), xaxt = "n",
+plot(NA, xlim = c(0.8, 2.2), ylim = c(10, 25), xaxt = "n",
      xlab = "", ylab = "Total reading-comprehension score (7-35)",
      main = "Pre -> Post by session group (Group x Time interaction)")
 axis(1, at = c(1, 2), labels = c("Pre", "Post"))
@@ -64,15 +65,21 @@ text(s$sessions, s$gain_m, labels = paste0("n=", table(d$Group)), pos = 3, cex =
 dev.off()
 
 ## ---- Plot 3: per-item interaction panel (Total + Survey Items 1-7) ----
-items <- c("Total", paste0("RC", 1:7))
-labs  <- c("Total", paste("Survey Item", 1:7))   # display labels for RC1-RC7
-prec  <- c("TotalA", paste0("RC", 1:7, "A"))
-postc <- c("TotalB", paste0("RC", 1:7, "B"))
+#items <- c("Total", paste0("RC", 1:7))
+#labs  <- c("Total", paste("Survey Item", 1:7))   # display labels for RC1-RC7
+#prec  <- c("TotalA", paste0("RC", 1:7, "A"))
+#postc <- c("TotalB", paste0("RC", 1:7, "B"))
+## ---- Plot 3: per-item interaction panel (Total + Survey Items 1-4,7) ----
+items <- c("Total", paste0("RC", c(1:4,7)))
+labs  <- c("Total", paste("Survey Item", c(1:4,7)))   # display labels for RC1-RC4, RC7
+prec  <- c("TotalA", paste0("RC", c(1:4,7), "A"))
+postc <- c("TotalB", paste0("RC", c(1:4,7), "B"))
 png(file.path("figures/fig_item_interaction_panel.png"), width = 2000, height = 1100, res = 175)
 par(mfrow = c(2, 4), mar = c(3.2, 3.6, 2.4, 0.6), mgp = c(2.1, 0.7, 0))
 for (k in seq_along(items)) {
   s <- cell_stats(prec[k], postc[k])
-  yl <- if (items[k] == "Total") c(18, 34) else c(2.3, 5)
+  #yl <- if (items[k] == "Total") c(8, 34) else c(2.3, 5)
+  yl <- if (items[k] == "Total") c(10, 25) else c(2.3, 5)
   yax <- if (items[k] == "Total") "Total score" else "Score (1-5)"
   plot(NA, xlim = c(0.8, 2.2), ylim = yl, xaxt = "n", xlab = "", ylab = yax, main = labs[k])
   axis(1, at = c(1, 2), labels = c("Pre", "Post"))

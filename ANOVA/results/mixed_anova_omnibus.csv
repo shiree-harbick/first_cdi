@@ -1,7 +1,7 @@
 "Outcome","Effect","df1","df2","F","p","ges"
-"Total","Group (between)",3,78,4.395,0.006551,0.101
-"Total","Time (within)",1,78,249.845,4.925e-26,0.5176
-"Total","Group x Time",3,78,7.471,0.0001845,0.0878
+"Total","Group (between)",3,78,4.029,0.01017,0.0892
+"Total","Time (within)",1,78,282.182,1.24e-27,0.5713
+"Total","Group x Time",3,78,8.132,8.864e-05,0.1033
 "Survey Item 1","Group (between)",3,78,0.711,0.5483,0.0158
 "Survey Item 1","Time (within)",1,78,52.439,2.726e-10,0.2173
 "Survey Item 1","Group x Time",3,78,3.389,0.02212,0.0511
@@ -14,12 +14,6 @@
 "Survey Item 4","Group (between)",3,78,8.784,4.351e-05,0.1532
 "Survey Item 4","Time (within)",1,78,72.818,8.689e-13,0.3024
 "Survey Item 4","Group x Time",3,78,3.84,0.01278,0.0642
-"Survey Item 5","Group (between)",3,78,6.833,0.000379,0.1386
-"Survey Item 5","Time (within)",1,78,4.374,0.03974,0.0213
-"Survey Item 5","Group x Time",3,78,2.017,0.1183,0.0292
-"Survey Item 6","Group (between)",3,78,1.203,0.3144,0.026
-"Survey Item 6","Time (within)",1,78,71.51,1.226e-12,0.2799
-"Survey Item 6","Group x Time",3,78,2.82,0.04436,0.044
 "Survey Item 7","Group (between)",3,78,2.838,0.04338,0.0621
 "Survey Item 7","Time (within)",1,78,54.465,1.478e-10,0.2154
 "Survey Item 7","Group x Time",3,78,1.605,0.1949,0.0237

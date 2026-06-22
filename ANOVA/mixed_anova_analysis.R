@@ -75,9 +75,11 @@ mixed_anova <- function(long, label) {
 # ---- run for Total + each item ----
 outcomes <- c(
   list(c("TotalA", "TotalB")),
-  lapply(1:7, function(i) c(paste0("RC", i, "A"), paste0("RC", i, "B")))
+  #lapply(1:7, function(i) c(paste0("RC", i, "A"), paste0("RC", i, "B")))
+  lapply(c(1:4,7), function(i) c(paste0("RC", i, "A"), paste0("RC", i, "B")))
 )
-labels <- c("Total", paste("Survey Item", 1:7))   # RC1-RC7 displayed as Survey Items
+#labels <- c("Total", paste("Survey Item", 1:7))   # RC1-RC7 displayed as Survey Items
+labels <- c("Total", paste("Survey Item", c(1:4,7)))   # RC1-RC4,RC7 displayed as Survey Items
 
 omnibus <- do.call(rbind, Map(function(o, l) mixed_anova(to_long(d, o[1], o[2]), l),
                               outcomes, labels))
