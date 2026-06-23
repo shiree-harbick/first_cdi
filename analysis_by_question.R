@@ -4,6 +4,8 @@
 # install.packages("gsheet")
 # install.packages("reticulate")
 # install.packages("devtools")
+#install.packages("dplyr")
+#install.packages("rstudioapi")
 
 ###########################################################################
 #  For using Python's code: https://rstudio.github.io/reticulate/index.html
