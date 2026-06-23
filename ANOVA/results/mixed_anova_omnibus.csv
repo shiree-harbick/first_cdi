@@ -1,7 +1,7 @@
 "Outcome","Effect","df1","df2","F","p","ges"
-"Total","Group (between)",3,78,4.029,0.01017,0.0892
-"Total","Time (within)",1,78,282.182,1.24e-27,0.5713
-"Total","Group x Time",3,78,8.132,8.864e-05,0.1033
+"Total","Group (between)",3,78,2.701,0.05126,0.0628
+"Total","Time (within)",1,78,147.13,1.233e-19,0.401
+"Total","Group x Time",3,78,2.892,0.04058,0.038
 "Survey Item 1","Group (between)",3,78,0.711,0.5483,0.0158
 "Survey Item 1","Time (within)",1,78,52.439,2.726e-10,0.2173
 "Survey Item 1","Group x Time",3,78,3.389,0.02212,0.0511

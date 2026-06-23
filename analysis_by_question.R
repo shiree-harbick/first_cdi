@@ -1,11 +1,12 @@
 # Make sure you install packages
+# install.packages("rlang")
 # install.packages("sqldf")
 # install.packages("stringr")
+# install.packages("readr")
 # install.packages("gsheet")
-# install.packages("reticulate")
 # install.packages("devtools")
-#install.packages("dplyr")
-#install.packages("rstudioapi")
+# install.packages("dplyr")
+# install.packages("rstudioapi")
 
 ###########################################################################
 #  For using Python's code: https://rstudio.github.io/reticulate/index.html
